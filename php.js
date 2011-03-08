@@ -3647,33 +3647,16 @@
 		return val;
 	}
 
-	HTTPViewScope.prototype.setcookie = function(name, value, expires, path, domain, secure) {
-		return this.setrawcookie(name, encodeURIComponent(value), expires, path, domain, secure);
-	}
+	HTTPViewScope.prototype.setcookie = function(name, value, expires, path, domain, secure, httponly) {
+		var extra = [];
+		if (secure) {
+			extra.push('Secure');
+		}
+		if (httponly) {
+			extra.push('HttpOnly');
+		}
 
-	HTTPViewScope.prototype.setrawcookie = function(name, value, expires, path, domain, secure) {
-		if (typeof expires === 'string' && (/^\d+$/).test(expires)) {
-			expires = parseInt(expires, 10);
-		}
-		if (expires instanceof Date) {
-			expires = expires.toGMTString();
-		} else if (typeof(expires) === 'number') {
-			expires = (new Date(expires * 1e3)).toGMTString();
-		}
-		var r = [name + '=' + value],
-			s = {},
-			i = '';
-		s = {
-			expires: expires,
-			path: path,
-			domain: domain
-		};
-		for (i in s) {
-			if (s.hasOwnProperty(i)) {
-				s[i] && r.push(i + '=' + s[i]);
-			}
-		}
-		return secure && r.push('secure'), window.document.cookie = r.join(";"), true;
+		this.setCookie(name, value, expires, path, domain, extra.join('; '));
 	}
 
 	HTTPViewScope.prototype.settype = function(vr, type) {
